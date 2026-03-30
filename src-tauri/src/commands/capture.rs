@@ -567,12 +567,7 @@ pub fn generate_recommendations_from_capture(
             continue; // already covered by per-port loop
         }
         if let Some(src_ip) = &finding.src_ip {
-            let severity = match finding.severity.as_str() {
-                "critical" => RiskSeverity::Critical,
-                "high" => RiskSeverity::High,
-                "medium" => RiskSeverity::Medium,
-                _ => RiskSeverity::Low,
-            };
+            let severity = finding.severity.clone();
             let action = if matches!(profile_enum, RiskProfile::Permissive) {
                 RuleAction::Pass
             } else {

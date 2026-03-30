@@ -2,10 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Default accent palette (Ocean) — overridden by useTheme at runtime ── */
+:root {
+  --brand-300: 125 211 252;
+  --brand-400: 56 189 248;
+  --brand-500: 14 165 233;
+  --brand-600: 2 132 199;
+}
+
+/* ── Surface palette: light mode ──────────────────────────────────────── */
+:root {
+  --surface-900: 245 245 247;
+  --surface-800: 255 255 255;
+  --surface-700: 237 238 242;
+  --surface-600: 218 220 224;
+  --surface-500: 174 178 185;
+}
+
+/* ── Surface palette: dark mode ───────────────────────────────────────── */
+.dark {
+  --surface-900: 15 17 23;
+  --surface-800: 22 27 34;
+  --surface-700: 33 38 45;
+  --surface-600: 48 54 61;
+  --surface-500: 72 79 88;
+}
+
 @layer base {
   body {
-    @apply bg-surface-900 text-gray-100 font-sans antialiased;
+    @apply bg-surface-900 text-gray-800 dark:text-gray-100 font-sans antialiased;
     font-family: "Inter", system-ui, sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   ::-webkit-scrollbar {
@@ -79,4 +106,32 @@
   .badge-closed {
     @apply bg-gray-500/20 text-gray-400 border border-gray-500/30 text-xs px-2 py-0.5 rounded-full font-mono;
   }
+}
+
+/* ── Light mode text adaptations ─────────────────────────────────────── */
+/* In dark mode the components use text-white and text-gray-100 freely.
+   In light mode we flip those to dark tones so text stays readable on
+   the light surface palette. This avoids adding dark: prefixes to every
+   component file. */
+
+:root:not(.dark) .text-white {
+  color: rgb(17 24 39); /* gray-900 */
+}
+
+:root:not(.dark) .text-gray-100 {
+  color: rgb(31 41 55); /* gray-800 */
+}
+
+:root:not(.dark) .text-gray-200 {
+  color: rgb(55 65 81); /* gray-700 */
+}
+
+:root:not(.dark) .text-gray-300 {
+  color: rgb(75 85 99); /* gray-600 */
+}
+
+/* Select dropdown styling for light mode */
+:root:not(.dark) select.input option {
+  background-color: white;
+  color: rgb(31 41 55);
 }

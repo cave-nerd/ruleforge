@@ -5,6 +5,8 @@ use pcap_file::pcap::PcapReader;
 use pcap_file::pcapng::{Block, PcapNgReader};
 use serde::{Deserialize, Serialize};
 
+use crate::engine::RiskSeverity;
+
 const MAX_PACKETS: usize = 100_000;
 
 // ── Output types (serialized to frontend) ─────────────────────────────────────
@@ -62,7 +64,7 @@ pub struct ProtocolCount {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CaptureFinding {
-    pub severity: String,
+    pub severity: RiskSeverity,
     pub src_ip: Option<String>,
     pub dst_ip: Option<String>,
     pub port: Option<u16>,
@@ -243,7 +245,7 @@ fn detect_risks(
                 let key = (pkt.dst_ip.clone(), port);
                 if seen.insert(key) {
                     findings.push(CaptureFinding {
-                        severity: "high".into(),
+                        severity: RiskSeverity::High,
                         src_ip: Some(pkt.src_ip.clone()),
                         dst_ip: Some(pkt.dst_ip.clone()),
                         port: Some(port),
@@ -260,7 +262,7 @@ fn detect_risks(
         if let Some(port) = pkt.dst_port {
             if PLAIN_HTTP_PORTS.contains(&port) && http_hosts.insert(pkt.dst_ip.clone()) {
                 findings.push(CaptureFinding {
-                    severity: "medium".into(),
+                    severity: RiskSeverity::Medium,
                     src_ip: Some(pkt.src_ip.clone()),
                     dst_ip: Some(pkt.dst_ip.clone()),
                     port: Some(port),
@@ -277,7 +279,7 @@ fn detect_risks(
     for host in hosts {
         if host.listening_ports.len() == 0 && host.packets_sent > 500 {
             findings.push(CaptureFinding {
-                severity: "medium".into(),
+                severity: RiskSeverity::Medium,
                 src_ip: Some(host.ip.clone()),
                 dst_ip: None,
                 port: None,
@@ -293,13 +295,13 @@ fn detect_risks(
     findings
 }
 
-fn severity_order(s: &str) -> u8 {
+fn severity_order(s: &RiskSeverity) -> u8 {
     match s {
-        "critical" => 0,
-        "high" => 1,
-        "medium" => 2,
-        "low" => 3,
-        _ => 4,
+        RiskSeverity::Critical => 0,
+        RiskSeverity::High => 1,
+        RiskSeverity::Medium => 2,
+        RiskSeverity::Low => 3,
+        RiskSeverity::Info => 4,
     }
 }
 

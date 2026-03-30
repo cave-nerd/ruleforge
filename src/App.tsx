@@ -10,7 +10,7 @@ import Settings from "./components/Settings";
 import { AppView, CaptureResult, RecommendationSet, ScanResult } from "./types";
 
 export default function App() {
-  const { theme, cycleTheme } = useTheme();
+  const { mode, accent, changeMode, changeAccent } = useTheme();
   const { logs, addLog, clearLogs } = useLogs();
 
   const [view, setView] = useState<AppView>("dashboard");
@@ -28,12 +28,10 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-surface-900 text-gray-100">
+    <div className="flex h-screen overflow-hidden bg-surface-900 text-gray-800 dark:text-gray-100">
       <Sidebar
         view={view}
         setView={setView}
-        theme={theme}
-        cycleTheme={cycleTheme}
         pendingCount={pendingCount}
       />
 
@@ -74,6 +72,10 @@ export default function App() {
             opnsenseInterface={opnsenseInterface}
             setOpnsenseInterface={setOpnsenseInterface}
             addLog={addLog}
+            themeMode={mode}
+            changeMode={changeMode}
+            accent={accent}
+            changeAccent={changeAccent}
           />
         )}
       </main>

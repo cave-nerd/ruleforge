@@ -5,17 +5,12 @@ import {
   ScrollText,
   Settings,
   Shield,
-  Sun,
-  Moon,
-  Monitor,
 } from "lucide-react";
 import { AppView } from "../types";
 
 interface SidebarProps {
   view: AppView;
   setView: (v: AppView) => void;
-  theme: "light" | "dark" | "system";
-  cycleTheme: () => void;
   pendingCount: number;
 }
 
@@ -27,17 +22,9 @@ const NAV = [
   { id: "settings" as AppView, label: "Settings", icon: Settings },
 ];
 
-function ThemeIcon({ theme }: { theme: string }) {
-  if (theme === "dark") return <Moon size={16} />;
-  if (theme === "light") return <Sun size={16} />;
-  return <Monitor size={16} />;
-}
-
 export default function Sidebar({
   view,
   setView,
-  theme,
-  cycleTheme,
   pendingCount,
 }: SidebarProps) {
   return (
@@ -77,15 +64,9 @@ export default function Sidebar({
         })}
       </nav>
 
-      {/* Theme toggle */}
-      <div className="p-3 border-t border-surface-600">
-        <button
-          onClick={cycleTheme}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-gray-100 hover:bg-surface-700 transition-colors w-full"
-        >
-          <ThemeIcon theme={theme} />
-          <span className="capitalize">{theme} theme</span>
-        </button>
+      {/* Version */}
+      <div className="px-5 py-3 border-t border-surface-600">
+        <p className="text-xs text-gray-600">RuleForge v0.1.0</p>
       </div>
     </aside>
   );

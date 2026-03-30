@@ -169,11 +169,15 @@ pub fn generate(scan: &ScanResult, profile: RiskProfile, interface: &str) -> Rec
         }
     }
 
-    // Deduplicate by port+action
-    recs.dedup_by(|a, b| {
-        a.rule.destination_port == b.rule.destination_port
-            && a.rule.action == b.rule.action
-    });
+    // Deduplicate by port+action — use a HashSet so non-consecutive
+    // duplicates are caught (dedup_by only removes adjacent matches).
+    {
+        let mut seen = std::collections::HashSet::new();
+        recs.retain(|r| {
+            let key = (r.rule.destination_port.clone(), r.rule.action.clone());
+            seen.insert(key)
+        });
+    }
 
     let summary = build_summary(&recs, &profile);
 

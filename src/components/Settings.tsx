@@ -11,13 +11,24 @@ import {
   KeyRound,
   Shield,
   Network,
+  Palette,
+  Check,
 } from "lucide-react";
 import { LogEntry } from "../types";
+import {
+  ThemeMode,
+  AccentColor,
+  ACCENT_PALETTES,
+} from "../hooks/useTheme";
 
 interface SettingsProps {
   opnsenseInterface: string;
   setOpnsenseInterface: (i: string) => void;
   addLog: (level: LogEntry["level"], msg: string) => void;
+  themeMode: ThemeMode;
+  changeMode: (m: ThemeMode) => void;
+  accent: AccentColor;
+  changeAccent: (a: AccentColor) => void;
 }
 
 interface ConfigSummary {
@@ -49,6 +60,10 @@ export default function Settings({
   opnsenseInterface,
   setOpnsenseInterface,
   addLog,
+  themeMode,
+  changeMode,
+  accent,
+  changeAccent,
 }: SettingsProps) {
   const [host, setHost] = useState("");
   const [apiKey, setApiKey] = useState("");
@@ -145,6 +160,67 @@ export default function Settings({
           secure keyring and never sent back across the IPC bridge.
         </p>
       </div>
+
+      {/* ── Theme & Appearance ───────────────────────────────────────── */}
+      <Section icon={Palette} title="Theme & Appearance">
+        <div className="space-y-5">
+          {/* Mode selector */}
+          <div>
+            <label className="text-xs text-gray-400 mb-1.5 block">Appearance</label>
+            <select
+              value={themeMode}
+              onChange={(e) => changeMode(e.target.value as ThemeMode)}
+              className="input max-w-xs cursor-pointer"
+            >
+              <option value="system">System (auto)</option>
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-2">
+              <strong className="text-gray-400">System</strong> follows your OS
+              preference. Override with Dark or Light for a fixed look.
+            </p>
+          </div>
+
+          {/* Accent colour picker */}
+          <div>
+            <label className="text-xs text-gray-400 mb-2 block">Accent Color</label>
+            <div className="flex gap-2 flex-wrap">
+              {(Object.keys(ACCENT_PALETTES) as AccentColor[]).map((key) => {
+                const palette = ACCENT_PALETTES[key];
+                const active = accent === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => changeAccent(key)}
+                    title={palette.label}
+                    className={`group relative w-10 h-10 rounded-xl transition-all duration-200 ${
+                      active
+                        ? "ring-2 ring-offset-2 ring-offset-surface-800 scale-110"
+                        : "hover:scale-105 opacity-80 hover:opacity-100"
+                    }`}
+                    style={{
+                      backgroundColor: palette.swatch,
+                      ...(active ? { ringColor: palette.swatch } : {}),
+                    }}
+                  >
+                    {active && (
+                      <Check
+                        size={16}
+                        className="absolute inset-0 m-auto text-white drop-shadow-md"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Changes the accent color used throughout the interface.
+              Currently: <strong className="text-gray-400">{ACCENT_PALETTES[accent].label}</strong>
+            </p>
+          </div>
+        </div>
+      </Section>
 
       <Section icon={Server} title="OPNsense Connection">
         <div className="space-y-4">
@@ -300,8 +376,9 @@ export default function Settings({
           <li className="flex items-start gap-2">
             <CheckCircle2 size={14} className="text-green-400 mt-0.5 shrink-0" />
             The shell capability is scoped to{" "}
-            <code className="text-brand-400">nmap</code> only — no other binary
-            can be invoked.
+            <code className="text-brand-400">nmap</code> and{" "}
+            <code className="text-brand-400">tshark</code> only — no other
+            binaries can be invoked.
           </li>
         </ul>
       </Section>

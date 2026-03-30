@@ -5,18 +5,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Brand palette
+        // Brand palette — driven by CSS custom properties set in useTheme.
+        // The rgb() wrapper with <alpha-value> enables Tailwind opacity
+        // modifiers like bg-brand-600/20.
         brand: {
-          50: "#f0f9ff",
-          100: "#e0f2fe",
-          200: "#bae6fd",
-          300: "#7dd3fc",
-          400: "#38bdf8",
-          500: "#0ea5e9",
-          600: "#0284c7",
-          700: "#0369a1",
-          800: "#075985",
-          900: "#0c4a6e",
+          300: "rgb(var(--brand-300) / <alpha-value>)",
+          400: "rgb(var(--brand-400) / <alpha-value>)",
+          500: "rgb(var(--brand-500) / <alpha-value>)",
+          600: "rgb(var(--brand-600) / <alpha-value>)",
         },
         // Severity colours
         critical: "#ef4444",
@@ -24,13 +20,13 @@ export default {
         medium: "#eab308",
         low: "#22c55e",
         info: "#6b7280",
-        // Surface colours (dark mode)
+        // Surface colours — driven by CSS custom properties for light/dark support
         surface: {
-          900: "#0f1117",
-          800: "#161b22",
-          700: "#21262d",
-          600: "#30363d",
-          500: "#484f58",
+          900: "rgb(var(--surface-900) / <alpha-value>)",
+          800: "rgb(var(--surface-800) / <alpha-value>)",
+          700: "rgb(var(--surface-700) / <alpha-value>)",
+          600: "rgb(var(--surface-600) / <alpha-value>)",
+          500: "rgb(var(--surface-500) / <alpha-value>)",
         },
       },
       fontFamily: {
