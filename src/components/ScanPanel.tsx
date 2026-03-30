@@ -104,27 +104,31 @@ function TagEditor({
         <button
           key={tag}
           onClick={() => onChange(ip, tags.filter((t) => t !== tag))}
-          title="Click to remove"
+          aria-label={`Remove ${tag} tag`}
           className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs border transition-opacity hover:opacity-70 ${tagCls(tag)}`}
         >
           {tag}
-          <X size={9} />
+          <X size={9} aria-hidden="true" />
         </button>
       ))}
       {available.length > 0 && (
         <button
           onClick={() => setPopOpen((o) => !o)}
+          aria-label="Add role tag"
+          aria-expanded={popOpen}
+          aria-haspopup="listbox"
           className="text-gray-600 hover:text-gray-300 transition-colors"
-          title="Add role tag"
         >
-          <Plus size={12} />
+          <Plus size={12} aria-hidden="true" />
         </button>
       )}
       {popOpen && (
-        <div className="absolute top-full left-0 mt-1 z-20 bg-surface-800 border border-surface-600 rounded-lg shadow-xl p-1.5 w-36">
+        <div role="listbox" aria-label="Available role tags" className="absolute top-full left-0 mt-1 z-20 bg-surface-800 border border-surface-600 rounded-lg shadow-xl p-1.5 w-36">
           {available.map((t) => (
             <button
               key={t.name}
+              role="option"
+              aria-selected={false}
               title={t.hint}
               onClick={() => { onChange(ip, [...tags, t.name]); setPopOpen(false); }}
               className={`block w-full text-left px-2 py-1 rounded text-xs border mb-0.5 last:mb-0 transition-opacity hover:opacity-80 ${t.cls}`}
@@ -179,10 +183,17 @@ function ConfBar({ conf }: { conf: number }) {
   const color = conf >= 8 ? "bg-green-500" : conf >= 5 ? "bg-yellow-500" : "bg-red-500";
   return (
     <div className="flex items-center gap-2">
-      <div className="w-16 h-1.5 bg-surface-600 rounded-full overflow-hidden">
+      <div
+        role="progressbar"
+        aria-label={`Confidence ${conf} out of 10`}
+        aria-valuenow={conf}
+        aria-valuemin={0}
+        aria-valuemax={10}
+        className="w-16 h-1.5 bg-surface-600 rounded-full overflow-hidden"
+      >
         <div className={`h-full ${color} rounded-full`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-xs text-gray-400 font-mono">{conf}/10</span>
+      <span className="text-xs text-gray-400 font-mono" aria-hidden="true">{conf}/10</span>
     </div>
   );
 }
@@ -217,8 +228,10 @@ function NmapHostCard({
       <button
         className="flex items-center gap-3 w-full text-left"
         onClick={() => setExpanded((e) => !e)}
+        aria-expanded={expanded}
+        aria-label={`${host.ip}${host.hostname ? ` (${host.hostname})` : ""}, ${openPorts} open ports. ${expanded ? "Collapse" : "Expand"} details.`}
       >
-        {expanded ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronRight size={16} className="text-gray-400" />}
+        {expanded ? <ChevronDown size={16} aria-hidden="true" className="text-gray-400" /> : <ChevronRight size={16} aria-hidden="true" className="text-gray-400" />}
         <span className="font-mono text-white">{host.ip}</span>
         {host.hostname && <span className="text-gray-400 text-sm">({host.hostname})</span>}
         {/* Role tags inline in the header */}
@@ -228,20 +241,20 @@ function NmapHostCard({
         <span className="ml-auto text-xs text-gray-400 shrink-0">
           {openPorts} open / {host.ports.length} total
         </span>
-        {openPorts > 0 && <AlertTriangle size={14} className="text-yellow-500 shrink-0" />}
+        {openPorts > 0 && <AlertTriangle size={14} aria-hidden="true" className="text-yellow-500 shrink-0" />}
       </button>
 
       {expanded && host.ports.length > 0 && (
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table aria-label={`Port details for ${host.ip}`} className="w-full text-left text-sm">
             <thead>
               <tr className="text-xs text-gray-500 uppercase tracking-wider">
-                <th className="py-1.5 px-3">Port/Proto</th>
-                <th className="py-1.5 px-3">State</th>
-                <th className="py-1.5 px-3">Service</th>
-                <th className="py-1.5 px-3">Product</th>
-                <th className="py-1.5 px-3">Confidence</th>
-                <th className="py-1.5 px-3">Reason</th>
+                <th scope="col" className="py-1.5 px-3">Port/Proto</th>
+                <th scope="col" className="py-1.5 px-3">State</th>
+                <th scope="col" className="py-1.5 px-3">Service</th>
+                <th scope="col" className="py-1.5 px-3">Product</th>
+                <th scope="col" className="py-1.5 px-3">Confidence</th>
+                <th scope="col" className="py-1.5 px-3">Reason</th>
               </tr>
             </thead>
             <tbody>
@@ -280,17 +293,17 @@ function ProtocolBar({ counts }: { counts: CaptureResult["protocol_counts"] }) {
   return (
     <div className="bg-surface-800 border border-surface-600 rounded-lg p-4">
       <h3 className="text-sm font-semibold text-gray-300 mb-3">Protocol Breakdown</h3>
-      <div className="flex h-5 rounded overflow-hidden gap-0.5 mb-3">
+      <div role="img" aria-label={`Protocol distribution: ${top.map((p) => `${p.protocol} ${p.packets} packets`).join(", ")}`} className="flex h-5 rounded overflow-hidden gap-0.5 mb-3">
         {top.map((p, i) => (
           <div
             key={p.protocol}
             className={`${COLORS[i % COLORS.length]} transition-all`}
             style={{ width: `${(p.packets / total) * 100}%` }}
-            title={`${p.protocol}: ${p.packets} packets`}
+            aria-hidden="true"
           />
         ))}
       </div>
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3" aria-hidden="true">
         {top.map((p, i) => (
           <span key={p.protocol} className="flex items-center gap-1.5 text-xs text-gray-400">
             <span className={`inline-block w-2.5 h-2.5 rounded-sm ${COLORS[i % COLORS.length]}`} />
@@ -322,7 +335,7 @@ function FindingsList({ findings }: { findings: CaptureFinding[] }) {
             key={i}
             className={`flex items-start gap-2 text-xs px-3 py-2 rounded border ${severityColor(f.severity)}`}
           >
-            <span className="mt-0.5 shrink-0">{severityIcon(f.severity)}</span>
+            <span className="mt-0.5 shrink-0" aria-hidden="true">{severityIcon(f.severity)}</span>
             <span className="uppercase font-bold shrink-0 w-16">{f.severity}</span>
             <span>{f.description}</span>
           </li>
@@ -342,10 +355,12 @@ function ProfileSelector({
   setProfile: (p: RiskProfile) => void;
 }) {
   return (
-    <div className="flex items-center gap-1">
+    <div role="radiogroup" aria-label="Risk profile" className="flex items-center gap-1">
       {(["strict", "balanced", "permissive"] as RiskProfile[]).map((p) => (
         <button
           key={p}
+          role="radio"
+          aria-checked={profile === p}
           onClick={() => setProfile(p)}
           className={`px-2.5 py-1 rounded text-xs font-medium capitalize transition-colors ${
             profile === p
@@ -512,7 +527,7 @@ export default function ScanPanel({
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-surface-600 bg-surface-800 shrink-0 gap-4 flex-wrap">
         <div className="flex items-center gap-2.5">
-          <ShieldCheck size={18} className="text-brand-400" />
+          <ShieldCheck size={18} aria-hidden="true" className="text-brand-400" />
           <h1 className="text-base font-semibold text-white">Scan & Ingest</h1>
         </div>
 
@@ -539,7 +554,7 @@ export default function ScanPanel({
               disabled={generating || loading}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-700 hover:bg-green-600 text-white text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Zap size={14} />
+              <Zap size={14} aria-hidden="true" />
               {generating ? "Generating…" : "Generate Rules →"}
             </button>
           )}
@@ -552,7 +567,7 @@ export default function ScanPanel({
         {/* Source mode selector */}
         <div className="bg-surface-800 border border-surface-600 rounded-xl p-4">
           <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-3">Data source</p>
-          <div className="flex gap-2 flex-wrap">
+          <div role="radiogroup" aria-label="Data source" className="flex gap-2 flex-wrap">
             {[
               { id: "nmap-upload" as ScanMode, label: "Nmap XML", icon: Upload, hint: "Upload a saved Nmap XML report" },
               { id: "nmap-live" as ScanMode, label: "Live Nmap Scan", icon: Terminal, hint: "Run Nmap directly against a target" },
@@ -560,6 +575,8 @@ export default function ScanPanel({
             ].map(({ id, label, icon: Icon, hint }) => (
               <button
                 key={id}
+                role="radio"
+                aria-checked={mode === id}
                 onClick={() => setMode(id)}
                 title={hint}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors border ${
@@ -568,7 +585,7 @@ export default function ScanPanel({
                     : "text-gray-400 hover:text-gray-200 hover:bg-surface-700 border-transparent"
                 }`}
               >
-                <Icon size={14} />
+                <Icon size={14} aria-hidden="true" />
                 {label}
               </button>
             ))}
@@ -582,14 +599,17 @@ export default function ScanPanel({
                 disabled={loading}
                 className="btn-primary flex items-center gap-2"
               >
-                {loading ? <RefreshCw size={14} className="animate-spin" /> : <Upload size={14} />}
+                <RefreshCw size={14} aria-hidden="true" className={loading ? "animate-spin" : "hidden"} />
+                <Upload size={14} aria-hidden="true" className={loading ? "hidden" : ""} />
                 {loading ? "Parsing…" : "Select Nmap XML"}
               </button>
             )}
 
             {mode === "nmap-live" && (
               <div className="flex gap-3">
+                <label htmlFor="nmap-target" className="sr-only">Scan target (IP, CIDR range, or hostname)</label>
                 <input
+                  id="nmap-target"
                   className="input"
                   placeholder="Target (e.g. 192.168.1.0/24 or hostname)"
                   value={nmapTarget}
@@ -601,7 +621,8 @@ export default function ScanPanel({
                   disabled={loading || !nmapTarget.trim()}
                   className="btn-primary flex items-center gap-2 whitespace-nowrap"
                 >
-                  {loading ? <RefreshCw size={14} className="animate-spin" /> : <Terminal size={14} />}
+                  <RefreshCw size={14} aria-hidden="true" className={loading ? "animate-spin" : "hidden"} />
+                  <Terminal size={14} aria-hidden="true" className={loading ? "hidden" : ""} />
                   {loading ? "Scanning…" : "Run Scan"}
                 </button>
               </div>
@@ -613,7 +634,8 @@ export default function ScanPanel({
                 disabled={loading}
                 className="btn-primary flex items-center gap-2"
               >
-                {loading ? <RefreshCw size={14} className="animate-spin" /> : <Upload size={14} />}
+                <RefreshCw size={14} aria-hidden="true" className={loading ? "animate-spin" : "hidden"} />
+                <Upload size={14} aria-hidden="true" className={loading ? "hidden" : ""} />
                 {loading ? "Parsing…" : "Open Capture File"}
               </button>
             )}
@@ -649,14 +671,14 @@ export default function ScanPanel({
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-20">
-                    <Circle size={48} className="text-surface-600 mb-4" />
+                    <Circle size={48} aria-hidden="true" className="text-surface-600 mb-4" />
                     <p className="text-gray-400">Scan complete — no hosts found.</p>
                   </div>
                 )}
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-                <FileSearch size={48} className="text-surface-500" />
+                <FileSearch size={48} aria-hidden="true" className="text-surface-500" />
                 <div>
                   <p className="text-gray-400 font-medium">No Nmap data loaded</p>
                   <p className="text-xs text-gray-600 mt-1">Upload an Nmap XML report or run a live scan above.</p>
@@ -681,7 +703,7 @@ export default function ScanPanel({
 
                 {/* Source file info */}
                 <div className="bg-surface-800 border border-surface-600 rounded-lg px-4 py-3 flex items-center gap-2 text-xs text-gray-400">
-                  <Activity size={13} className="text-brand-400" />
+                  <Activity size={13} aria-hidden="true" className="text-brand-400" />
                   <span className="font-mono">{captureResult.source_file}</span>
                   <span className="text-gray-600">·</span>
                   <span>{captureResult.format}</span>
@@ -698,24 +720,24 @@ export default function ScanPanel({
                 {/* Host table with tags */}
                 <div className="bg-surface-800 border border-surface-600 rounded-lg overflow-hidden">
                   <div className="flex items-center gap-2 px-4 py-3 border-b border-surface-600">
-                    <Wifi size={14} className="text-brand-400" />
+                    <Wifi size={14} aria-hidden="true" className="text-brand-400" />
                     <h3 className="text-sm font-semibold text-gray-300">
                       Hosts ({captureResult.hosts.length})
                     </h3>
                   </div>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-xs">
+                    <table aria-label="Capture hosts" className="w-full text-xs">
                       <thead>
                         <tr className="border-b border-surface-600 text-gray-500">
-                          <th className="px-4 py-2 text-left font-medium">IP Address</th>
-                          <th className="px-4 py-2 text-right font-medium">Pkts Sent</th>
-                          <th className="px-4 py-2 text-right font-medium">Pkts Recv</th>
-                          <th className="px-4 py-2 text-right font-medium">Bytes Out</th>
-                          <th className="px-4 py-2 text-right font-medium">Bytes In</th>
-                          <th className="px-4 py-2 text-left font-medium">Protocols</th>
-                          <th className="px-4 py-2 text-left font-medium">Open Ports</th>
-                          <th className="px-4 py-2 text-left font-medium">
-                            <span className="flex items-center gap-1"><Tag size={11} /> Role Tags</span>
+                          <th scope="col" className="px-4 py-2 text-left font-medium">IP Address</th>
+                          <th scope="col" className="px-4 py-2 text-right font-medium">Pkts Sent</th>
+                          <th scope="col" className="px-4 py-2 text-right font-medium">Pkts Recv</th>
+                          <th scope="col" className="px-4 py-2 text-right font-medium">Bytes Out</th>
+                          <th scope="col" className="px-4 py-2 text-right font-medium">Bytes In</th>
+                          <th scope="col" className="px-4 py-2 text-left font-medium">Protocols</th>
+                          <th scope="col" className="px-4 py-2 text-left font-medium">Open Ports</th>
+                          <th scope="col" className="px-4 py-2 text-left font-medium">
+                            <span className="flex items-center gap-1"><Tag size={11} aria-hidden="true" /> Role Tags</span>
                           </th>
                         </tr>
                       </thead>
@@ -757,20 +779,20 @@ export default function ScanPanel({
                 {captureResult.conversations.length > 0 && (
                   <div className="bg-surface-800 border border-surface-600 rounded-lg overflow-hidden">
                     <div className="flex items-center gap-2 px-4 py-3 border-b border-surface-600">
-                      <Activity size={14} className="text-brand-400" />
+                      <Activity size={14} aria-hidden="true" className="text-brand-400" />
                       <h3 className="text-sm font-semibold text-gray-300">
                         Top Conversations (showing {Math.min(captureResult.conversations.length, 100)} of {captureResult.conversations.length})
                       </h3>
                     </div>
                     <div className="overflow-x-auto">
-                      <table className="w-full text-xs">
+                      <table aria-label="Top network conversations" className="w-full text-xs">
                         <thead>
                           <tr className="border-b border-surface-600 text-gray-500">
-                            <th className="px-4 py-2 text-left font-medium">Source</th>
-                            <th className="px-4 py-2 text-left font-medium">Destination</th>
-                            <th className="px-4 py-2 text-left font-medium">Proto</th>
-                            <th className="px-4 py-2 text-right font-medium">Packets</th>
-                            <th className="px-4 py-2 text-right font-medium">Bytes</th>
+                            <th scope="col" className="px-4 py-2 text-left font-medium">Source</th>
+                            <th scope="col" className="px-4 py-2 text-left font-medium">Destination</th>
+                            <th scope="col" className="px-4 py-2 text-left font-medium">Proto</th>
+                            <th scope="col" className="px-4 py-2 text-right font-medium">Packets</th>
+                            <th scope="col" className="px-4 py-2 text-right font-medium">Bytes</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -796,7 +818,7 @@ export default function ScanPanel({
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-                <FileSearch size={48} className="text-surface-500" />
+                <FileSearch size={48} aria-hidden="true" className="text-surface-500" />
                 <div>
                   <p className="text-gray-400 font-medium">No capture loaded</p>
                   <p className="text-xs text-gray-600 mt-1">

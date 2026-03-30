@@ -44,10 +44,10 @@ function SeverityBadge({ severity }: { severity: string }) {
 
 function ActionIcon({ action }: { action: string }) {
   if (action === "pass")
-    return <Shield size={14} className="text-green-400 shrink-0" />;
+    return <Shield size={14} aria-hidden="true" className="text-green-400 shrink-0" />;
   if (action === "block")
-    return <ShieldOff size={14} className="text-red-400 shrink-0" />;
-  return <Eye size={14} className="text-yellow-400 shrink-0" />;
+    return <ShieldOff size={14} aria-hidden="true" className="text-red-400 shrink-0" />;
+  return <Eye size={14} aria-hidden="true" className="text-yellow-400 shrink-0" />;
 }
 
 function RuleCard({
@@ -73,6 +73,7 @@ function RuleCard({
           checked={selected}
           onChange={onToggle}
           onClick={(e) => e.stopPropagation()}
+          aria-label={`Select rule: ${rec.rule.description}`}
           className="mt-1 accent-brand-500"
         />
         <ActionIcon action={rule.action} />
@@ -120,9 +121,9 @@ function ExistingRuleRow({ row }: { row: OPNsenseRuleRow }) {
 
 function ValidationPanel({ result }: { result: ValidationResult }) {
   return (
-    <div className="card mt-4">
+    <div className="card mt-4" aria-live="polite" aria-atomic="true">
       <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
-        <CheckCircle2 size={16} className="text-green-400" />
+        <CheckCircle2 size={16} aria-hidden="true" className="text-green-400" />
         Validation Scan — {result.target}
       </h3>
       <div className="grid grid-cols-3 gap-4 text-center">
@@ -152,7 +153,7 @@ function ValidationPanel({ result }: { result: ValidationResult }) {
       {result.still_open.length > 0 && (
         <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
           <p className="text-sm text-red-400 flex items-center gap-2">
-            <AlertTriangle size={14} />
+            <AlertTriangle size={14} aria-hidden="true" />
             Ports still open: {result.still_open.join(", ")}
           </p>
         </div>
@@ -160,7 +161,7 @@ function ValidationPanel({ result }: { result: ValidationResult }) {
       {result.still_open.length === 0 && result.previously_open.length > 0 && (
         <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
           <p className="text-sm text-green-400 flex items-center gap-2">
-            <CheckCircle2 size={14} />
+            <CheckCircle2 size={14} aria-hidden="true" />
             All targeted ports are now filtered.
           </p>
         </div>
@@ -294,11 +295,8 @@ export default function StagingArea({
             disabled={deploying || selected.size === 0}
             className="btn-primary flex items-center gap-2"
           >
-            {deploying ? (
-              <RefreshCw size={14} className="animate-spin" />
-            ) : (
-              <Play size={14} />
-            )}
+            <RefreshCw size={14} aria-hidden="true" className={deploying ? "animate-spin" : "hidden"} />
+            <Play size={14} aria-hidden="true" className={deploying ? "hidden" : ""} />
             {deploying ? "Deploying…" : `Deploy (${selected.size})`}
           </button>
 
@@ -309,9 +307,9 @@ export default function StagingArea({
               className="btn-ghost flex items-center gap-2"
             >
               {validating ? (
-                <RefreshCw size={14} className="animate-spin" />
+                <RefreshCw size={14} aria-hidden="true" className="animate-spin" />
               ) : (
-                <CheckCircle2 size={14} />
+                <CheckCircle2 size={14} aria-hidden="true" />
               )}
               {validating ? "Validating…" : "Validate"}
             </button>
@@ -322,16 +320,18 @@ export default function StagingArea({
       {/* Summary banner */}
       {recommendations && (
         <div className="flex items-center gap-3 p-3 bg-brand-600/10 border border-brand-600/30 rounded-xl text-sm text-brand-300">
-          <Info size={16} />
+          <Info size={16} aria-hidden="true" />
           {recommendations.summary}
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-surface-600 pb-0">
+      <div role="tablist" aria-label="Rule view" className="flex gap-1 border-b border-surface-600 pb-0">
         {(["proposed", "existing"] as const).map((tab) => (
           <button
             key={tab}
+            role="tab"
+            aria-selected={activeTab === tab}
             onClick={() => {
               setActiveTab(tab);
               if (tab === "existing" && existingRules.length === 0) {
@@ -348,7 +348,7 @@ export default function StagingArea({
               <span className="flex items-center gap-1.5">
                 Proposed
                 {recs.length > 0 && (
-                  <span className="bg-brand-600 text-white text-xs rounded-full px-1.5">
+                  <span aria-label={`${recs.length} proposed rules`} className="bg-brand-600 text-white text-xs rounded-full px-1.5">
                     {recs.length}
                   </span>
                 )}
@@ -357,7 +357,7 @@ export default function StagingArea({
               <span className="flex items-center gap-1.5">
                 Existing
                 {existingRules.length > 0 && (
-                  <span className="bg-surface-500 text-gray-300 text-xs rounded-full px-1.5">
+                  <span aria-label={`${existingRules.length} existing rules`} className="bg-surface-500 text-gray-300 text-xs rounded-full px-1.5">
                     {existingRules.length}
                   </span>
                 )}
@@ -375,6 +375,7 @@ export default function StagingArea({
               <div className="flex items-center gap-3">
                 <button
                   onClick={toggleAll}
+                  aria-label={selected.size === recs.length ? "Deselect all rules" : "Select all rules"}
                   className="text-xs text-brand-400 hover:text-brand-300 transition-colors"
                 >
                   {selected.size === recs.length ? "Deselect all" : "Select all"}
@@ -408,19 +409,19 @@ export default function StagingArea({
       {activeTab === "existing" && (
         <>
           {loadingExisting ? (
-            <div className="flex items-center justify-center py-20">
-              <RefreshCw size={24} className="animate-spin text-brand-400" />
+            <div className="flex items-center justify-center py-20" aria-live="polite" aria-label="Loading existing rules">
+              <RefreshCw size={24} aria-hidden="true" className="animate-spin text-brand-400" />
             </div>
           ) : existingRules.length > 0 ? (
             <div className="card overflow-x-auto">
-              <table className="w-full text-left">
+              <table aria-label="Existing firewall rules" className="w-full text-left">
                 <thead>
                   <tr className="text-xs text-gray-500 uppercase tracking-wider">
-                    <th className="py-2 px-3">Action</th>
-                    <th className="py-2 px-3">Port</th>
-                    <th className="py-2 px-3">Interface</th>
-                    <th className="py-2 px-3">Description</th>
-                    <th className="py-2 px-3">Status</th>
+                    <th scope="col" className="py-2 px-3">Action</th>
+                    <th scope="col" className="py-2 px-3">Port</th>
+                    <th scope="col" className="py-2 px-3">Interface</th>
+                    <th scope="col" className="py-2 px-3">Description</th>
+                    <th scope="col" className="py-2 px-3">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -450,8 +451,8 @@ export default function StagingArea({
 
       {/* Deploy result */}
       {applyResult && (
-        <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-xl text-sm text-green-300 flex items-center gap-2">
-          <CheckCircle2 size={16} />
+        <div aria-live="polite" aria-atomic="true" className="p-3 bg-green-500/10 border border-green-500/30 rounded-xl text-sm text-green-300 flex items-center gap-2">
+          <CheckCircle2 size={16} aria-hidden="true" />
           {applyResult.rules_added} rules deployed. Config backup taken:{" "}
           {applyResult.backup_taken ? "yes" : "no"}.
         </div>

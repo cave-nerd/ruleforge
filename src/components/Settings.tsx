@@ -46,13 +46,13 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="card">
+    <section aria-labelledby={`section-${title.replace(/\s+/g, "-").toLowerCase()}`} className="card">
       <div className="flex items-center gap-2 mb-4 pb-3 border-b border-surface-600">
-        <Icon size={16} className="text-brand-400" />
-        <h2 className="font-semibold text-white">{title}</h2>
+        <Icon size={16} className="text-brand-400" aria-hidden="true" />
+        <h2 id={`section-${title.replace(/\s+/g, "-").toLowerCase()}`} className="font-semibold text-white">{title}</h2>
       </div>
       {children}
-    </div>
+    </section>
   );
 }
 
@@ -184,8 +184,8 @@ export default function Settings({
 
           {/* Accent colour picker */}
           <div>
-            <label className="text-xs text-gray-400 mb-2 block">Accent Color</label>
-            <div className="flex gap-2 flex-wrap">
+            <label className="text-xs text-gray-400 mb-2 block" id="accent-color-label">Accent Color</label>
+            <div className="flex gap-2 flex-wrap" role="radiogroup" aria-labelledby="accent-color-label">
               {(Object.keys(ACCENT_PALETTES) as AccentColor[]).map((key) => {
                 const palette = ACCENT_PALETTES[key];
                 const active = accent === key;
@@ -193,7 +193,9 @@ export default function Settings({
                   <button
                     key={key}
                     onClick={() => changeAccent(key)}
-                    title={palette.label}
+                    role="radio"
+                    aria-checked={active}
+                    aria-label={`${palette.label} accent color${active ? " (selected)" : ""}`}
                     className={`group relative w-10 h-10 rounded-xl transition-all duration-200 ${
                       active
                         ? "ring-2 ring-offset-2 ring-offset-surface-800 scale-110"
@@ -207,6 +209,7 @@ export default function Settings({
                     {active && (
                       <Check
                         size={16}
+                        aria-hidden="true"
                         className="absolute inset-0 m-auto text-white drop-shadow-md"
                       />
                     )}
@@ -225,8 +228,9 @@ export default function Settings({
       <Section icon={Server} title="OPNsense Connection">
         <div className="space-y-4">
           <div>
-            <label className="text-xs text-gray-400 mb-1.5 block">Host / IP</label>
+            <label htmlFor="opnsense-host" className="text-xs text-gray-400 mb-1.5 block">Host / IP</label>
             <input
+              id="opnsense-host"
               className="input"
               placeholder="192.168.1.1"
               value={host}
@@ -235,9 +239,10 @@ export default function Settings({
           </div>
 
           <div>
-            <label className="text-xs text-gray-400 mb-1.5 block">API Key</label>
+            <label htmlFor="opnsense-api-key" className="text-xs text-gray-400 mb-1.5 block">API Key</label>
             <div className="relative">
               <input
+                id="opnsense-api-key"
                 className="input pr-10"
                 placeholder={secretsLoaded ? "••••••••  (loaded in Rust state)" : "API Key"}
                 type={showKey ? "text" : "password"}
@@ -247,18 +252,19 @@ export default function Settings({
               <button
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
                 onClick={() => setShowKey((s) => !s)}
-                tabIndex={-1}
+                aria-label={showKey ? "Hide API key" : "Show API key"}
                 type="button"
               >
-                {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                {showKey ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
               </button>
             </div>
           </div>
 
           <div>
-            <label className="text-xs text-gray-400 mb-1.5 block">API Secret</label>
+            <label htmlFor="opnsense-api-secret" className="text-xs text-gray-400 mb-1.5 block">API Secret</label>
             <div className="relative">
               <input
+                id="opnsense-api-secret"
                 className="input pr-10"
                 placeholder={secretsLoaded ? "••••••••  (loaded in Rust state)" : "API Secret"}
                 type={showSecret ? "text" : "password"}
@@ -268,10 +274,10 @@ export default function Settings({
               <button
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
                 onClick={() => setShowSecret((s) => !s)}
-                tabIndex={-1}
+                aria-label={showSecret ? "Hide API secret" : "Show API secret"}
                 type="button"
               >
-                {showSecret ? <EyeOff size={14} /> : <Eye size={14} />}
+                {showSecret ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
               </button>
             </div>
           </div>
@@ -289,12 +295,14 @@ export default function Settings({
             </label>
           </div>
 
-          {testOk && (
-            <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/30 rounded-lg text-sm text-green-300">
-              <CheckCircle2 size={14} />
-              Connected — OPNsense {testOk}
-            </div>
-          )}
+          <div aria-live="polite" aria-atomic="true">
+            {testOk && (
+              <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/30 rounded-lg text-sm text-green-300">
+                <CheckCircle2 size={14} aria-hidden="true" />
+                Connected — OPNsense {testOk}
+              </div>
+            )}
+          </div>
 
           <div className="flex gap-2 flex-wrap">
             <button
@@ -303,8 +311,8 @@ export default function Settings({
               className="btn-ghost flex items-center gap-2 text-sm"
               type="button"
             >
-              {testing ? <RefreshCw size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-              Test Connection
+              <RefreshCw size={14} aria-hidden="true" className={testing ? "animate-spin" : ""} />
+              {testing ? "Testing…" : "Test Connection"}
             </button>
             <button
               onClick={saveCredentials}
@@ -312,7 +320,7 @@ export default function Settings({
               className="btn-primary flex items-center gap-2 text-sm"
               type="button"
             >
-              <Save size={14} />
+              <Save size={14} aria-hidden="true" />
               {saving ? "Saving…" : "Save to Keyring"}
             </button>
             <button
@@ -320,7 +328,7 @@ export default function Settings({
               className="btn-ghost flex items-center gap-2 text-sm"
               type="button"
             >
-              <KeyRound size={14} />
+              <KeyRound size={14} aria-hidden="true" />
               Load Saved
             </button>
             <button
@@ -328,7 +336,7 @@ export default function Settings({
               className="btn-ghost flex items-center gap-2 text-sm text-red-400 hover:text-red-300"
               type="button"
             >
-              <Trash2 size={14} />
+              <Trash2 size={14} aria-hidden="true" />
               Clear
             </button>
           </div>
@@ -337,10 +345,11 @@ export default function Settings({
 
       <Section icon={Network} title="Network Interface">
         <div>
-          <label className="text-xs text-gray-400 mb-1.5 block">
+          <label htmlFor="opnsense-iface" className="text-xs text-gray-400 mb-1.5 block">
             OPNsense interface for generated rules
           </label>
           <input
+            id="opnsense-iface"
             className="input max-w-xs"
             placeholder="wan"
             value={iface}
@@ -357,24 +366,24 @@ export default function Settings({
       <Section icon={Shield} title="Security Notes">
         <ul className="space-y-2 text-sm text-gray-400">
           <li className="flex items-start gap-2">
-            <CheckCircle2 size={14} className="text-green-400 mt-0.5 shrink-0" />
+            <CheckCircle2 size={14} aria-hidden="true" className="text-green-400 mt-0.5 shrink-0" />
             Credentials transit IPC exactly once (on save). After that the API
             secret lives only in the OS keyring and Rust{" "}
             <code className="text-brand-400">AppState</code> — never returned to JS.
           </li>
           <li className="flex items-start gap-2">
-            <CheckCircle2 size={14} className="text-green-400 mt-0.5 shrink-0" />
+            <CheckCircle2 size={14} aria-hidden="true" className="text-green-400 mt-0.5 shrink-0" />
             All OPNsense traffic uses TLS via rustls. Secrets are wrapped in{" "}
             <code className="text-brand-400">Zeroizing&lt;String&gt;</code> and
             scrubbed from RAM when the client is dropped.
           </li>
           <li className="flex items-start gap-2">
-            <CheckCircle2 size={14} className="text-green-400 mt-0.5 shrink-0" />
+            <CheckCircle2 size={14} aria-hidden="true" className="text-green-400 mt-0.5 shrink-0" />
             A full config backup is taken before every rule deployment. Rules are
             reviewed in the Staging Area before anything is applied.
           </li>
           <li className="flex items-start gap-2">
-            <CheckCircle2 size={14} className="text-green-400 mt-0.5 shrink-0" />
+            <CheckCircle2 size={14} aria-hidden="true" className="text-green-400 mt-0.5 shrink-0" />
             The shell capability is scoped to{" "}
             <code className="text-brand-400">nmap</code> and{" "}
             <code className="text-brand-400">tshark</code> only — no other

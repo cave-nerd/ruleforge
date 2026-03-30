@@ -44,12 +44,13 @@ function OverviewCard({
     <button
       onClick={onClick}
       disabled={!onClick}
+      aria-label={`${label}: ${value}${sub ? `, ${sub}` : ""}`}
       className={`bg-surface-800 border border-surface-600 rounded-xl p-5 text-left transition-colors ${
         onClick ? "hover:bg-surface-700 hover:border-surface-500 cursor-pointer" : "cursor-default"
       }`}
     >
       <div className="flex items-center gap-2 mb-3">
-        <Icon size={16} className={color} />
+        <Icon size={16} aria-hidden="true" className={color} />
         <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">{label}</span>
       </div>
       <p className={`text-2xl font-bold font-mono ${color}`}>{value}</p>
@@ -92,9 +93,9 @@ function SourceCard({
           </div>
         </div>
         {loaded ? (
-          <CheckCircle2 size={16} className="text-green-500 shrink-0" />
+          <CheckCircle2 size={16} aria-label="Data loaded" className="text-green-500 shrink-0" />
         ) : (
-          <div className="w-4 h-4 rounded-full border-2 border-surface-500 shrink-0" />
+          <div aria-label="No data loaded" className="w-4 h-4 rounded-full border-2 border-surface-500 shrink-0" />
         )}
       </div>
 
@@ -114,7 +115,7 @@ function SourceCard({
         className="flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 font-medium transition-colors"
       >
         {actionLabel}
-        <ChevronRight size={12} />
+        <ChevronRight size={12} aria-hidden="true" />
       </button>
     </div>
   );
@@ -140,10 +141,17 @@ function RiskRow({ severity, count }: { severity: string; count: number }) {
   return (
     <div className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${cls}`}>
       <span className="capitalize text-xs font-bold w-16">{severity}</span>
-      <div className="flex-1 h-1.5 bg-black/20 rounded-full overflow-hidden">
+      <div
+        role="progressbar"
+        aria-label={`${severity} risk findings`}
+        aria-valuenow={count}
+        aria-valuemin={0}
+        aria-valuemax={10}
+        className="flex-1 h-1.5 bg-black/20 rounded-full overflow-hidden"
+      >
         <div className={`h-full ${barCls} rounded-full`} style={{ width: `${Math.min(count * 10, 100)}%` }} />
       </div>
-      <span className="text-xs font-mono font-semibold w-6 text-right">{count}</span>
+      <span className="text-xs font-mono font-semibold w-6 text-right" aria-hidden="true">{count}</span>
     </div>
   );
 }
@@ -264,7 +272,7 @@ export default function Dashboard({
       {totalRisks > 0 && (
         <div className="bg-surface-800 border border-surface-600 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle size={14} className="text-red-400" />
+            <AlertTriangle size={14} aria-hidden="true" className="text-red-400" />
             <h3 className="text-sm font-semibold text-gray-300">Capture Risk Breakdown</h3>
           </div>
           <div className="flex flex-col gap-1.5">
@@ -285,7 +293,7 @@ export default function Dashboard({
             onClick={() => setView("capture")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium transition-colors"
           >
-            <FileSearch size={14} />
+            <FileSearch size={14} aria-hidden="true" />
             {hasAnyData ? "Load Another Scan" : "Get Started"}
           </button>
           {pendingRules > 0 && (
@@ -293,7 +301,7 @@ export default function Dashboard({
               onClick={() => setView("staging")}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-700 hover:bg-green-600 text-white text-sm font-medium transition-colors"
             >
-              <Layers size={14} />
+              <Layers size={14} aria-hidden="true" />
               Review {pendingRules} Pending {pendingRules === 1 ? "Rule" : "Rules"}
             </button>
           )}
@@ -301,7 +309,7 @@ export default function Dashboard({
             onClick={() => setView("logs")}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-700 hover:bg-surface-600 text-gray-300 text-sm font-medium transition-colors"
           >
-            <Activity size={14} />
+            <Activity size={14} aria-hidden="true" />
             View Logs
           </button>
         </div>
@@ -310,7 +318,7 @@ export default function Dashboard({
       {/* Empty state */}
       {!hasAnyData && (
         <div className="flex flex-col items-center justify-center flex-1 text-center py-10">
-          <ShieldCheck size={48} className="text-surface-600 mb-4" />
+          <ShieldCheck size={48} aria-hidden="true" className="text-surface-600 mb-4" />
           <p className="text-gray-400 font-medium">Nothing loaded yet</p>
           <p className="text-gray-600 text-sm mt-1">
             Head to <strong className="text-gray-400">Scan & Ingest</strong> to load an Nmap report or Wireshark capture.
